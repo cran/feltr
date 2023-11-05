@@ -48,3 +48,30 @@ proc_elements <- function(l) {
     links = purrr::map_chr(l$links, 'self')
   )
 }
+
+proc_comments <- function(l) {
+  tibble::tibble(
+    author_email = purrr::map(l,
+                              .f = function(x) purrr::map_chr(purrr::pluck(x, 'comments'),
+                                                              function(y) purrr::pluck(y, 'authorEmail'))),
+    author_name = purrr::map(l,
+                             .f = function(x) purrr::map_chr(purrr::pluck(x, 'comments'),
+                                                             function(y) purrr::pluck(y, 'authorName'))),
+    created_at = purrr::map(l,
+                            .f = function(x) purrr::map_chr(purrr::pluck(x, 'comments'),
+                                                            function(y) purrr::pluck(y, 'createdAt'))),
+    comment_id = purrr::map(l,
+                            .f = function(x) purrr::map_chr(purrr::pluck(x, 'comments'),
+                                                            function(y) purrr::pluck(y, 'id'))),
+    comment_text = purrr::map(l,
+                              .f = function(x) purrr::map_chr(purrr::pluck(x, 'comments'),
+                                                              function(y) purrr::pluck(y, 'text'))),
+    id = purrr::map_chr(l, .f = function(x) purrr::pluck(x, 'id')),
+    is_resolved = purrr::map_lgl(l, .f = function(x) purrr::pluck(x, 'isResolved')),
+    lat = purrr::map_dbl(l, .f = function(x) purrr::pluck(x, 'location', 1)),
+    lon = purrr::map_dbl(l, .f = function(x) purrr::pluck(x, 'location', 2))
+  ) |>
+    tidyr::unnest_longer(
+      col = c('author_email', 'author_name', 'created_at', 'comment_id', 'comment_text')
+    )
+}
